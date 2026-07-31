@@ -116,7 +116,7 @@ describe("formatSingleTargetComment", () => {
 
     expect(out).toContain("unexpected failure");
     expect(out).toContain("workflow run logs");
-    expect(out).toContain("github.com/korthout/backport-action/issues");
+    expect(out).toContain("github.com/step-security/backport-action/issues");
   });
 });
 
@@ -380,7 +380,7 @@ describe("formatNoTargetsComment", () => {
     const out = formatNoTargetsComment(context);
 
     expect(out).toContain(
-      `[Backport-action](https://github.com/korthout/backport-action) found no target branches to backport this pull request to in [workflow run ${context.runId}](${context.runUrl}).`,
+      `[Backport-action](https://github.com/step-security/backport-action) found no target branches to backport this pull request to in [workflow run ${context.runId}](${context.runUrl}).`,
     );
   });
 

@@ -9,6 +9,55 @@ import { Github } from "./github.js";
 import { Git } from "./git.js";
 import { coerceCherryPickingMergeMode } from "./utils.js";
 import dedent from "dedent";
+import fs from "fs";
+import axios, { isAxiosError } from "axios";
+
+async function validateSubscription() {
+  const eventPath = process.env.GITHUB_EVENT_PATH;
+  let repoPrivate: boolean | undefined;
+
+  if (eventPath && fs.existsSync(eventPath)) {
+    const eventData = JSON.parse(fs.readFileSync(eventPath, "utf8"));
+    repoPrivate = eventData?.repository?.private;
+  }
+
+  const upstream = "korthout/backport-action";
+  const action = process.env.GITHUB_ACTION_REPOSITORY;
+  const docsUrl =
+    "https://docs.stepsecurity.io/actions/stepsecurity-maintained-actions";
+
+  core.info("");
+  core.info("\u001b[1;36mStepSecurity Maintained Action\u001b[0m");
+  core.info(`Secure drop-in replacement for ${upstream}`);
+  if (repoPrivate === false)
+    core.info("\u001b[32m\u2713 Free for public repositories\u001b[0m");
+  core.info(`\u001b[36mLearn more:\u001b[0m ${docsUrl}`);
+  core.info("");
+
+  if (repoPrivate === false) return;
+
+  const serverUrl = process.env.GITHUB_SERVER_URL || "https://github.com";
+  const body: Record<string, string> = { action: action || "" };
+  if (serverUrl !== "https://github.com") body.ghes_server = serverUrl;
+  try {
+    await axios.post(
+      `https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/maintained-actions-subscription`,
+      body,
+      { timeout: 3000 },
+    );
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 403) {
+      core.error(
+        `\u001b[1;31mThis action requires a StepSecurity subscription for private repositories.\u001b[0m`,
+      );
+      core.error(
+        `\u001b[31mLearn how to enable a subscription: ${docsUrl}\u001b[0m`,
+      );
+      process.exit(1);
+    }
+    core.info("Timeout or API not reachable. Continuing to next step.");
+  }
+}
 
 /**
  * Called from the action.yml.
@@ -16,6 +65,7 @@ import dedent from "dedent";
  * Is separated from backport for testing purposes
  */
 async function run(): Promise<void> {
+  await validateSubscription();
   const token = core.getInput("github_token", { required: true });
   const pwd = core.getInput("github_workspace", { required: true });
   const gitCommitterName = core.getInput("git_committer_name");
@@ -98,15 +148,15 @@ async function run(): Promise<void> {
 
   for (const key in experimental) {
     if (!(key in experimentalDefaults)) {
-      console.warn(dedent`Encountered unexpected key in input 'experimental'.\
-        No experimental config options known for key '${key}'.\
-        Please check the documentation for details about experimental features.`);
+      console.warn(
+        dedent`Encountered unexpected key in input 'experimental'.        No experimental config options known for key '${key}'.        Please check the documentation for details about experimental features.`,
+      );
     }
 
     if (key in deprecatedExperimental) {
-      console.warn(dedent`Encountered deprecated key in input 'experimental'.\
-        Key '${key}' is no longer used. You should remove it from your workflow.\
-        Please check the release notes or the documentation for more details.`);
+      console.warn(
+        dedent`Encountered deprecated key in input 'experimental'.        Key '${key}' is no longer used. You should remove it from your workflow.        Please check the release notes or the documentation for more details.`,
+      );
     }
 
     if (key == "conflict_resolution") {

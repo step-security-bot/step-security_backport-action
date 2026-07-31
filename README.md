@@ -52,7 +52,7 @@ jobs:
       github.event.pull_request.merged &&
       contains(toJSON(github.event.pull_request.labels.*.name), '"backport ')
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Create backport pull requests
         uses: step-security/backport-action@v4
 ```
@@ -97,7 +97,7 @@ jobs:
         startsWith(github.event.comment.body, '/backport')
       )
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Create backport pull requests
         uses: step-security/backport-action@v4
 ```
@@ -146,7 +146,7 @@ jobs:
     if: needs.determine-target-branch.outputs.branch != ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Create backport pull requests
         uses: step-security/backport-action@v4
         with:
@@ -175,7 +175,7 @@ Pin any third‑party action you use for this by commit SHA for supply‑chain s
 ...
 - name: Import GPG key
   id: import-gpg
-  uses: crazy-max/ghaction-import-gpg@v6.3.0 # Or any other action to set up GPG
+  uses: step-security/ghaction-import-gpg@v7 # Or any other action to set up GPG
   with:
     gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
     passphrase: ${{ secrets.GPG_PASSPHRASE }}
@@ -508,7 +508,7 @@ The following placeholders are available and are replaced with:
 Placeholder | Replaced with
 ------------|------------
 `issue_refs` | GitHub issue references to all issues mentioned in the original pull request description seperated by a space, e.g. `#123 #456 step-security/backport-action#789`
-`pull_author` | The username of the original pull request's author, e.g. `korthout`
+`pull_author` | The username of the original pull request's author, e.g. `step-security`
 `pull_description`| The description (i.e. body) of the original pull request that is backported, e.g. `Summary: This patch was created to..`
 `pull_number` | The number of the original pull request that is backported, e.g. `123`
 `pull_title` | The title of the original pull request that is backported, e.g. `fix: some error`

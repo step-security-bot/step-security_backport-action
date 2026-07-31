@@ -21,7 +21,7 @@ export type CommentContext = {
 };
 
 const ACTION_LINK =
-  "[Backport-action](https://github.com/korthout/backport-action)";
+  "[Backport-action](https://github.com/step-security/backport-action)";
 
 /**
  * Renders the full progressive summary comment.
@@ -213,7 +213,7 @@ export function formatSingleTargetComment(
     `:x: ${targetBranch} — unexpected failure`,
     dedent`An unexpected error occurred while backporting to \`${targetBranch}\`.
 
-           Please check the workflow run logs for the full error and stack trace, and consider reporting this as a bug at https://github.com/korthout/backport-action/issues.`,
+           Please check the workflow run logs for the full error and stack trace, and consider reporting this as a bug at https://github.com/step-security/backport-action/issues.`,
   );
 }
 
